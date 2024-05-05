@@ -1,3 +1,4 @@
+from time import sleep
 import cv2
 import numpy as np
 from controller import Supervisor
@@ -57,7 +58,7 @@ if preview == 1:
 
 last_error = 0  # Initialize the last error as a global variable outside the function
 
-def getLineError():
+def getError():
     global last_error  # Declare it as global to modify the variable outside the function scope
 
     # Get the image from the robot's camera
@@ -72,6 +73,7 @@ def getLineError():
 
     # Create mask based on thresholds
     mask = cv2.inRange(hsv, lower_white, upper_white)
+
  
     # Find contours in the mask
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -144,118 +146,61 @@ manual_control = False
 key_pressed = False
 
 
-# 导航点列表
-waypoints = [(-15.0, -94.0)]
 
-# 获取当前导航点
-def get_current_waypoint():
-    if len(waypoints) > 0:
-        return waypoints[0]
-    else:
-        return None
+stop_point = (-35, 84)  # 定义停车点的坐标(x, y)
+def isAtStopPoint():
+    # 获取机器人的当前位置
+    position = robotNode.getPosition()
+    x, y = position[0], position[1]  # 假设机器人在平面上移动,y坐标对应于3D空间的z坐标
 
-# 判断是否到达当前导航点  
-def reached_waypoint(curr_pos, waypoint, threshold=8):
-    if waypoint is None:
+    # 检查机器人是否在停车点附近(可以根据需要调整阈值)
+    if abs(x - stop_point[0]) < 5 and abs(y - stop_point[1]) < 5:
         return True
-    dx = curr_pos[0] - waypoint[0]
-    dy = curr_pos[1] - waypoint[1]
-    return abs(dx) < threshold and abs(dy) < threshold
-
-# 获取下一个导航点
-def get_next_waypoint():
-    global waypoints
-    if len(waypoints) > 1:
-        waypoints = waypoints[1:]
-        return waypoints[0]
     else:
-        return None
-
-def getError(act_error, waypoint, curr_pos):
-    if waypoint is None:
-        return 0
-    
-    # 计算车辆当前位置到目标导航点的方向
-    dx = waypoint[0] - curr_pos[0]
-    dy = waypoint[1] - curr_pos[1]
-    waypoint_angle = np.arctan2(dy, dx)
-
-    # 如果视觉检测到了车道线,结合车道线方向和导航点方向
-    if act_error is not None:
-        line_angle = act_error / 160.0 * np.pi / 2
-        return waypoint_angle * 0.7 + line_angle * 0.3
-    else:
-        # 如果没有检测到车道线,直接使用导航点的方向
-        return waypoint_angle
-
+        return False
 
 # Main control loop
+stopped = False
 while robot.step(timestep) != -1:
-    # 获取当前位置
-    curr_pos = robotNode.getPosition()[:2]  # (x, y)
+    #print('当前位置', robotNode.getPosition())
     
-    # 获取当前导航点
-    waypoint = get_current_waypoint()
-
+    print(isAtStopPoint())
     key = robot.keyboard.getKey()
-    if key != -1 :
-        keyCtrl()
-    
+    if key != -1:
+        pass  # to do
     else:
-        # Autonomous control based on line detection and path planning
-        if waypoint is not None:
-            # 计算方向和距离
-            dx = waypoint[0] - curr_pos[0]
-            dy = waypoint[1] - curr_pos[1]
-            dist = (dx**2 + dy**2)**0.5
-            
-            # 根据方向和距离计算控制量
-            P = getError(0, waypoint, curr_pos)
-            I += (2 / 3) * P * (timestep / 1000)
-            D = 0.5 * (P - oldP) / (timestep / 1000)
-            
-            PID = Kp * P + Ki * I + Kd * D
-            oldP = P
-
-            # Adjust steering based on the PID output
-            if abs(PID) < STEERING_RESET_TOLERANCE:
-                hndB = 0  # Reset handlebar to center if error is within tolerance
-            else:
-                # Adjust the maximum handlebar angle based on the error
-                max_handlebar_angle = np.clip(abs(PID), 0, -hMax)  # Ensures the angle is within a dynamic range
-                hndB = np.sign(PID) * max_handlebar_angle * 0.65  # Adjusts direction based on the sign of PID
-            
-            # 判断是否到达导航点
-            if reached_waypoint(curr_pos, waypoint):
-                print('Reached waypoint:', waypoint)
-                waypoint = get_next_waypoint()
-                if waypoint is None:
-                    print('Reached final waypoint, stopping the vehicle')
-                    bcyS = 0
-                    hndB = 0
+        # Autonomous control based on line detection
+        current_error = getError()
+        P = current_error
+        I += (2 / 3) * P * (timestep / 1000)
+        D = 0.5 * (P - oldP) / (timestep / 1000)
+        
+        PID = Kp * P + Ki * I + Kd * D
+        oldP = P
+        
+        # Adjust steering based on the PID output
+        if abs(PID) < STEERING_RESET_TOLERANCE:
+            hndB = 0  # Reset handlebar to center if error is within tolerance
         else:
-            # 所有导航点已到达,停车
-            hndB = 0
-            bcyS = 0
+            # Adjust the maximum handlebar angle based on the error
+            max_handlebar_angle = np.clip(abs(PID), 0, -hMax)  # Ensures the angle is within a dynamic range
+            hndB = np.sign(PID) * max_handlebar_angle * 0.65  # Adjusts direction based on the sign of PID
+        
+        # Check if the robot has reached the stop point
+        if isAtStopPoint():
+            print('Reached the stop point')
+            bcyS = 0  # Stop the robot if it's at the stop point
+            if(stopped == False):
+                sleep(5)
+                stopped = True
+                bcyS = maxS
             
-            # If no waypoints, follow the line
-            current_error = getLineError()
-            P = current_error
-            I += (2 / 3) * P * (timestep / 1000)
-            D = 0.5 * (P - oldP) / (timestep / 1000)
-            
-            PID = Kp * P + Ki * I + Kd * D
-            oldP = P
-            
-            # Adjust steering based on the PID output
-            if abs(PID) < STEERING_RESET_TOLERANCE:
-                hndB = 0  # Reset handlebar to center if error is within tolerance
-            else:
-               # Adjust the maximum handlebar angle based on the error
-                max_handlebar_angle = np.clip(abs(PID), 0, -hMax)  # Ensures the angle is within a dynamic range
-                hndB = np.sign(PID) * max_handlebar_angle * 0.65  # Adjusts direction based on the sign of PID
-     
-    whemotor.setVelocity(max(minS, min(bcyS, maxS)))  # Ensure velocity stays within bounds
-    hndmotor.setPosition(hndB)  
+        else:
+            # Adjust velocity based on the line detection
+            whemotor.setVelocity(max(minS, min(bcyS, maxS)))  # Ensure velocity stays within bounds
+        
+        hndmotor.setPosition(hndB)  
 
     printStatus()
+
+

@@ -12701,6 +12701,6 @@ Robot {
   recognitionColors [
     0 0 0
   ]
-  controller "scooter_follow_line"
+  controller "path_planning"
   supervisor TRUE
 }
