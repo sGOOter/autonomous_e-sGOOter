@@ -1,116 +1,179 @@
 import cv2
 import numpy as np
+from controller import Supervisor
 
-def nothing(x):
-    pass
+robot = Supervisor()
+# get the time step of the current world.
+timestep = int(robot.getBasicTimeStep())
 
-video_path = './Little_Bicycle.mp4'
+robotNode = robot.getSelf()
 
-# Video capture
-cap = cv2.VideoCapture(video_path)
-frame_counter = 0
+preview = 0 # Mask Preview 1
 
-# Font settings
-font = cv2.FONT_HERSHEY_PLAIN
-fontScale = 1
-color = (0, 255, 0)
+Kp = 0.01
+Ki = 0.02
+Kd = 0.0001
 
-while(cap.isOpened()):
-    ret, frame = cap.read()
+P = 0
+I = 0
+D = 0
+oldP = 0
+PID = 0
 
-    frame_counter += 1
-    # Detecting if the video comes to an end to start again
-    if frame_counter == cap.get(cv2.CAP_PROP_FRAME_COUNT):
-        frame_counter = 0
-        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+# Bicycle speed and handlebar settings
+maxS = 4 # max speed
+minS = 2 # min speed
+bcyS = maxS
+acceleration = 2  # Acceleration factor
+deceleration = 0.5  # Deceleration factor
 
-    if ret:
-        # Copy the image to draw the polygon
-        img0 = frame.copy()
+hMax = 0.1 # rads (11°) Max
+hndB = 0 # center initially
+maxV = 0 # Max Velocity
 
-        # Frame height and width
-        h = frame.shape[0]
-        w = frame.shape[1]
+# Motor and handlebar controls
+whemotor = robot.getDevice('motor::crank')
+whemotor.setPosition(float('inf'))
+whemotor.setVelocity(maxS)  # Set initial velocity to move forward
 
-        # Center mark vertical position
-        ySet = 205
+hndmotor = robot.getDevice('handlebars motor')
+hndmotor.setPosition(0)
 
-        # Mask for area of interest
-        mask = np.zeros((h, w), dtype=np.uint8)
+# Keyboard setup
+robot.keyboard.enable(timestep)
+robot.keyboard = robot.getKeyboard()
 
-        # Points of the area of interest
-        pts = np.array([[[90, 200], [390, 200], [410, 210], [70, 210]]])
+# Camera and display setup
+camera = robot.getDevice('camera')
+camera.enable(timestep*4)
 
-        # Drawing the area of interest polygon on the mask
-        cv2.fillPoly(mask, pts, 255)
+display = robot.getDevice('display')
+display.attachCamera(camera)
+display.setColor(0x00FF00)
+display.setFont('Verdana', 16, True)
 
-        # Applying the mask to the frame
-        zone = cv2.bitwise_and(frame, frame, mask=mask)
+if preview == 1:
+    cv2.startWindowThread()
 
-        # Generating the HSV image
-        hsv = cv2.cvtColor(zone, cv2.COLOR_BGR2HSV)
+last_error = 0  # Initialize the last error as a global variable outside the function
 
-        # Dark color reference in HSV
-        dark_color = np.array([75, 0, 0])
+def getError():
+    global last_error  # Declare it as global to modify the variable outside the function scope
 
-        # Light color reference in HSV
-        bght_color = np.array([179, 255, 255])
+    # Get the image from the robot's camera
+    img = np.frombuffer(camera.getImage(), dtype=np.uint8).reshape((camera.getHeight(), camera.getWidth(), 4))
 
-        # Kernel filter
-        Kernel = np.ones((5, 5), np.uint8)
+    # Convert to HSV
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-        #Application of the HSV filter on the mask
-        mask0 = cv2.inRange(hsv, dark_color, bght_color)
+    # Define thresholds for detecting white
+    lower_white = np.array([0, 0, 200], dtype=np.uint8)
+    upper_white = np.array([180, 50, 255], dtype=np.uint8)
 
-        # Morphological transformation for noise removal
-        mask0 = cv2.morphologyEx(mask0, cv2.MORPH_CLOSE, Kernel)
-        mask0 = cv2.morphologyEx(mask0, cv2.MORPH_OPEN, Kernel)
+    # Create mask based on thresholds
+    mask = cv2.inRange(hsv, lower_white, upper_white)
 
-        # Contour search
-        cnts0, _ = cv2.findContours(mask0, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+ 
+    # Find contours in the mask
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if contours:
+        # Find the largest contour assumed to be the line
+        largest_contour = max(contours, key=cv2.contourArea)
+        M = cv2.moments(largest_contour)
+        if M["m00"] != 0:
+            cx = int(M["m10"] / M["m00"])
+            # Calculate error based on the center of the line
+            center_x = camera.getWidth() // 2
+            last_error = (cx - center_x)*0.03  # Update the last known error
+            # print('detect error:', last_error)
+            return last_error
+    # print('no detect error:')
+    return 0  # Return the last known error if no line is detected
 
-        # Drawing the contours in the img0
-        cv2.drawContours(img0, cnts0, -1, (0, 255, 255), 1)
 
-        # Select the largest countour
-        largest_contour = max(cnts0, key=cv2.contourArea)
 
-        # Obtaining the contour moments
-        largest_contour_center = cv2.moments(largest_contour)
+manual_control = False
+def keyCtrl():
+    global bcyS, hndB, manual_control
+    key = robot.keyboard.getKey()
 
-        # Calculating the center at x using m10 and m00
-        center_x = int(largest_contour_center['m10'] / largest_contour_center['m00'])
+    if key == 315:
+        print("forward")
+        bcyS = maxS  # Increase speed by a factor
+    elif key == 317:
+        bcyS = minS  # Decrease speed by a factor
+        print("backward")
+    elif key == ord('S'):
+        bcyS = 0  # Stop
 
-        # Drawing a filled circle (-1)
-        cv2.circle(frame, (center_x, ySet), 3, (0, 255, 0), -1)
+    if key == 314:  # Left arrow
+        hndB = hMax
+        print("left")
+    elif key == 316:  # Right arrow
+        hndB = -hMax
+    else:
+        hndB = 0  # Center handlebar if no left/right keys are pressed
 
-        # Drawing a vertical line
-        cv2.line(frame, (center_x, ySet - 20), (center_x, ySet + 20), (0, 255, 0), 1)
+    whemotor.setVelocity(max(minS, min(bcyS, maxS)))  # Ensure velocity stays within bounds
+    hndmotor.setPosition(hndB)
+    
+    
+def hms(sec):
+    # Convert seconds to hours:minutes:seconds
+    h = sec // 3600
+    m = (sec % 3600) // 60
+    s = (sec % 3600) % 60
+    return f'{h:02d}:{m:02d}:{s:02d}'
 
-        # Drawing a horizontal line
-        cv2.line(frame, (center_x - 20, ySet), (center_x + 20, ySet), (0, 255, 0), 1)
+def printStatus():
+    global maxV
+    velo = robotNode.getVelocity()
+    velocity = np.sqrt(np.sum(np.square(velo[:3]))) * 3.6  # Convert m/s to km/h
+    if velocity > maxV:
+        maxV = (velocity + maxV) / 2
 
-        # Showing images with contours
-        cv2.imshow('Video 0', img0)
+    timer = int(robot.getTime())
+    strP = hms(timer)
+    
+    robot.setLabel(0, f'Robot: {robot.getName()} Speed: {velocity:.2f} km/h Max: {maxV:.2f} km/h', 0, 0.05, 0.06, 0x000000, 0, 'Lucida Console')
 
-        # Showing the detected center
-        cv2.imshow('Video 1', frame)
 
-        cv2.putText(hsv, 'HSV', (140, 120), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2, cv2.LINE_AA)
 
-        # Showing the HSV image
-        cv2.imshow('HSV', hsv)
+STEERING_RESET_TOLERANCE = 0.0015
 
-        cv2.putText(mask0, 'mask', (120, 120), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2, cv2.LINE_AA)
+manual_control = False
+key_pressed = False
 
-        # Showing the mask processed image
-        cv2.imshow('Mask', mask0)
 
-        # Detecting if any key is pressed and if the ESC key
-        k = cv2.waitKey(5)
-        if k == 27:
-            cv2.destroyAllWindows()
-            break
 
-# Capture is released
-cap.release()
+# Main control loop
+while robot.step(timestep) != -1:
+    key = robot.keyboard.getKey()
+    if key != -1 :
+        pass #to do
+    
+    else:
+        # Autonomous control based on line detection
+        #print("auto")
+        current_error = getError()
+        P = current_error
+        I += (2 / 3) * P * (timestep / 1000)
+        D = 0.5 * (P - oldP) / (timestep / 1000)
+        
+        PID = Kp * P + Ki * I + Kd * D
+        oldP = P
+        
+        # Adjust steering based on the PID output
+        if abs(PID) < STEERING_RESET_TOLERANCE:
+            hndB = 0  # Reset handlebar to center if error is within tolerance
+        else:
+           # Adjust the maximum handlebar angle based on the error
+            max_handlebar_angle = np.clip(abs(PID), 0, -hMax)  # Ensures the angle is within a dynamic range
+            hndB = np.sign(PID) * max_handlebar_angle * 0.65  # Adjusts direction based on the sign of PID
+        
+     
+        whemotor.setVelocity(max(minS, min(bcyS, maxS)))  # Ensure velocity stays within bounds
+        hndmotor.setPosition(hndB)  
+        # print(f"PID: {PID}, Steering: {hndB}, Velocity: {whemotor.getVelocity()}")
+
+    printStatus()
