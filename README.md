@@ -34,7 +34,7 @@ Components managing various functionalities of the autonomous system:
 - sGOOter part:
     - `little_bicycle_P_V2`: Currently controls circular movement; will evolve with project development.
     - `keyboard_control`: User keyboard to control the motion.
-    - `scooter_follow_line`: Follow the line automaticly. (Still developing)
+    - `scooter_follow_line`: Follow the line automaticly while enabling the key interference.
 
 ### Worlds
 
