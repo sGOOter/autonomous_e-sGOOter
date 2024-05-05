@@ -3,6 +3,7 @@
 import cv2
 import numpy as np
 from controller import Supervisor
+from path_planning import get_current_waypoint, reached_waypoint, get_next_waypoint, getError
 
 robot = Supervisor()
 # get the time step of the current world.
@@ -93,12 +94,12 @@ def getError(act_error):
     try:
         cnts0, _ = cv2.findContours(mask0, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
     except:
-        return error_P
+        return None
     else:
         try:
             largest_contour = max(cnts0, key=cv2.contourArea)
         except:
-            return error_P
+            return None
         else:
             try:
                 x,y,w,h = cv2.boundingRect(largest_contour)
@@ -110,7 +111,7 @@ def getError(act_error):
                 display.drawLine(center_x, ySet - 20, center_x, ySet + 20)
                 display.fillOval(center_x, ySet, 3, 3)
             except:
-                return error_P
+                return None
             else:
                 return xSet - center_x 
 
@@ -154,7 +155,7 @@ def printStatus():
 
     timer = int(robot.getTime())
     strP = hms(timer)
-    
+    vpos = 0.93 # added the vertical position
     if robot.getName() == 'Little Bicycle 1':
         vpos = 0.93
         strP = f'Time: {strP:s}'
@@ -166,23 +167,49 @@ def printStatus():
         
 # Main loop:
 while robot.step(timestep) != -1:
+    # 获取当前位置
+    curr_pos = robotNode.getPosition()[:2]  # (x, y)
+    print('Current position:', curr_pos)
+    # 获取当前导航点
+    waypoint = get_current_waypoint()
+    print('Current waypoint:', waypoint)
+    if waypoint is not None:
+        # 计算方向和距离
+        dx = waypoint[0] - curr_pos[0]
+        dy = waypoint[1] - curr_pos[1]
+        dist = (dx**2 + dy**2)**0.5
+        
+        # 根据方向和距离计算控制量
+        P = getError(P)
+        P = getError(P, waypoint, curr_pos)
+        I = I * 2 / 3 + P * timestep / 1000
+        D = D * 0.5 + (P - oldP) / timestep * 1000
+        
+        PID = Kp * P + Ki * I + Kd * D
+        oldP = P
 
-    P = getError(P)
-    I = I * 2 / 3 + P * timestep / 1000
-    D = D * 0.5 + (P - oldP) / timestep * 1000
-    
-    PID = Kp * P + Ki * I + Kd * D
-    oldP = P
-
-    hndB = hMax - abs(PID)
-    hndB = hndB + PID
-    if hndB > hMax: hndB = hMax
-    elif hndB < -hMax: hndB = -hMax
-    
-    bcyS = maxS
-    bcyS = bcyS - abs(PID * 4)
-    if bcyS < minS: bcyS = minS
-
+        hndB = hMax - abs(PID)
+        hndB = hndB + PID
+        if hndB > hMax: hndB = hMax
+        elif hndB < -hMax: hndB = -hMax
+        
+        bcyS = maxS
+        bcyS = bcyS - abs(PID * 4)
+        if bcyS < minS: bcyS = minS
+        
+        # 判断是否到达导航点
+        if reached_waypoint(curr_pos, waypoint):
+            print('Reached waypoint:', waypoint)
+            waypoint = get_next_waypoint()
+            if waypoint is None:
+                print('Reached final waypoint, stopping the vehicle')
+                bcyS = 0
+                hndB = 0
+    else:
+        # 所有导航点已到达,停车
+        hndB = 0
+        bcyS = 0
+        
     # Set position handlebar
     hndmotor.setPosition(hndB)
     whemotor.setVelocity(bcyS)

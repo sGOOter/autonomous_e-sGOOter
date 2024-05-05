@@ -4,3 +4,4 @@
 # Ignore specific files in the worlds directory
 worlds/.city.wbproj
 worlds/.city.jpg
+worlds/obj
