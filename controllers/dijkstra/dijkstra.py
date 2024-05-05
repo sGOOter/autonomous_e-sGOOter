@@ -3,6 +3,61 @@ import cv2
 import numpy as np
 from controller import Supervisor
 
+# 定义图中的点
+nodes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'X', 'Y']
+
+# 定义邻接矩阵表示图的连通性,1表示连通,0表示不连通
+graph = [
+    [0, 1, 0, 1, 1, 0, 0, 0, 1, 0],
+    [1, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+    [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 0, 0, 1, 0, 1, 0],
+    [1, 0, 0, 0, 0, 1, 0, 1, 1, 0],
+    [0, 1, 1, 0, 1, 0, 1, 0, 0, 1],
+    [0, 0, 0, 1, 0, 1, 0, 1, 0, 1],
+    [0, 0, 1, 0, 1, 0, 1, 0, 0, 0],
+    [1, 0, 0, 1, 1, 0, 0, 0, 0, 1],
+    [0, 0, 1, 0, 0, 1, 1, 0, 1, 0]
+]
+
+def floyd(graph):
+    '''佛洛依德算法计算所有点对最短路径和路径'''
+    n = len(graph)
+    dist = [[float('inf')] * n for _ in range(n)]
+    path = [[None] * n for _ in range(n)]
+    
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                dist[i][j] = 0
+                path[i][j] = [nodes[i]]
+            elif graph[i][j]:
+                dist[i][j] = graph[i][j]
+                path[i][j] = [nodes[i], nodes[j]]
+    
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                if dist[i][j] > dist[i][k] + dist[k][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]
+                    path[i][j] = path[i][k] + path[k][j][1:]
+    
+    return dist, path
+
+# 计算所有点对最短路径和路径
+shortest_paths, shortest_paths_nodes = floyd(graph)
+
+# 打印结果
+print("All-pairs shortest paths:")
+print("    " + " ".join(nodes))
+for i, row in enumerate(shortest_paths):
+    print(nodes[i], row)
+
+print("\nAll-pairs shortest paths with nodes:")    
+for i in range(len(nodes)):
+    for j in range(len(nodes)):
+        print(f"{nodes[i]} -> {nodes[j]}: {' -> '.join(shortest_paths_nodes[i][j])}")
+
 robot = Supervisor()
 # get the time step of the current world.
 timestep = int(robot.getBasicTimeStep())
@@ -12,7 +67,7 @@ robotNode = robot.getSelf()
 preview = 0 # Mask Preview 1
 
 Kp = 0.01
-Ki = 0.02
+Ki = 0.02 
 Kd = 0.0001
 
 P = 0
@@ -22,14 +77,14 @@ oldP = 0
 PID = 0
 
 # Bicycle speed and handlebar settings
-maxS = 4 # max speed
+maxS = 4 # max speed 
 minS = 2 # min speed
 bcyS = maxS
 acceleration = 2  # Acceleration factor
 deceleration = 0.5  # Deceleration factor
 
 hMax = 0.1 # rads (11°) Max
-hndB = 0 # center initially
+hndB = 0 # center initially 
 maxV = 0 # Max Velocity
 
 # Motor and handlebar controls
@@ -159,6 +214,32 @@ def isAtStopPoint():
     else:
         return False
 
+# 定义节点的坐标位置
+node_positions = {
+    'A': (97.84, -37.29),  # A点的坐标(x, y)
+    'B': (97.84, 89.50),  # B点的坐标(x, y)
+    'C': (-35.53, 89.18),  # C点的坐标(x, y)
+    'D': (-35.53, -37.29),  # D点的坐标(x, y)
+    'E': (34.86, -100.35),  # E点的坐标(x, y)
+    'F': (34.86, 33.08),  # F点的坐标(x, y)
+    'G': (-94.84, 33.08),  # G点的坐标(x, y)
+    'H': (-94.84, -92.09),  # H点的坐标(x, y)
+    'X': (45.39, -46.16),  # X点的坐标(x, y)
+    'Y': (-48.04, 44.51)   # Y点的坐标(x, y)
+}
+
+start_point = 'B'  # 定义起点为B
+target_point = 'A'  # 定义目标点为A
+
+# 获取从起点到目标点的最短路径节点列表
+start_index = nodes.index(start_point)
+target_index = nodes.index(target_point)
+shortest_path = shortest_paths_nodes[start_index][target_index]
+
+print(f"Shortest path from {start_point} to {target_point}: {' -> '.join(shortest_path)}")
+
+# 初始化当前节点为起点
+current_node = start_point
 # Main control loop
 stopped = False
 while robot.step(timestep) != -1:
@@ -186,22 +267,32 @@ while robot.step(timestep) != -1:
             max_handlebar_angle = np.clip(abs(PID), 0, -hMax)  # Ensures the angle is within a dynamic range
             hndB = np.sign(PID) * max_handlebar_angle * 0.65  # Adjusts direction based on the sign of PID
         
-        # Check if the robot has reached the stop point
-        if isAtStopPoint():
-            print('Reached the stop point')
-            bcyS = 0  # Stop the robot if it's at the stop point
-            if(stopped == False):
-                sleep(5)
-                stopped = True
-                bcyS = maxS
-                whemotor.setVelocity(max(minS, min(bcyS, maxS)))
-            
-        else:
-            # Adjust velocity based on the line detection
-            whemotor.setVelocity(max(minS, min(bcyS, maxS)))  # Ensure velocity stays within bounds
-        
-        hndmotor.setPosition(hndB)  
+        # 获取小车的当前位置
+        position = robotNode.getPosition()
+        x, y = position[0], position[1]
+
+        # 检查小车是否到达了当前目标节点
+        current_node_index = nodes.index(current_node)
+        if abs(x - node_positions[current_node][0]) < 1 and abs(y - node_positions[current_node][1]) < 1:
+            # 如果到达了当前节点,就更新目标节点为路径中的下一个节点
+            current_node_index += 1
+            if current_node_index < len(shortest_path):
+                current_node = shortest_path[current_node_index]
+            else:
+                print("Reached the target point")
+                bcyS = 0  # 停止小车
+                break
+
+        # 根据当前节点和目标节点,计算小车的运动方向
+        target_node_position = node_positions[current_node]
+        direction = np.arctan2(target_node_position[1] - y, target_node_position[0] - x)
+
+        # 根据运动方向调整小车的转向角度
+        hndB = direction
+
+        # 调整速度
+        whemotor.setVelocity(max(minS, min(bcyS, maxS)))  # 确保速度在合理范围内
+        hndmotor.setPosition(hndB)
+
 
     printStatus()
-
-
