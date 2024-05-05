@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 from controller import Supervisor
-from path_planning import get_current_waypoint, reached_waypoint, get_next_waypoint, getError
 
 robot = Supervisor()
 # get the time step of the current world.
@@ -73,7 +72,7 @@ def getLineError():
 
     # Create mask based on thresholds
     mask = cv2.inRange(hsv, lower_white, upper_white)
-
+ 
     # Find contours in the mask
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if contours:
@@ -85,7 +84,9 @@ def getLineError():
             # Calculate error based on the center of the line
             center_x = camera.getWidth() // 2
             last_error = (cx - center_x)*0.03  # Update the last known error
+            # print('detect error:', last_error)
             return last_error
+    # print('no detect error:')
     return 0  # Return the last known error if no line is detected
 
 
@@ -142,6 +143,50 @@ STEERING_RESET_TOLERANCE = 0.0015
 manual_control = False
 key_pressed = False
 
+
+# 导航点列表
+waypoints = [(-15.0, -94.0)]
+
+# 获取当前导航点
+def get_current_waypoint():
+    if len(waypoints) > 0:
+        return waypoints[0]
+    else:
+        return None
+
+# 判断是否到达当前导航点  
+def reached_waypoint(curr_pos, waypoint, threshold=8):
+    if waypoint is None:
+        return True
+    dx = curr_pos[0] - waypoint[0]
+    dy = curr_pos[1] - waypoint[1]
+    return abs(dx) < threshold and abs(dy) < threshold
+
+# 获取下一个导航点
+def get_next_waypoint():
+    global waypoints
+    if len(waypoints) > 1:
+        waypoints = waypoints[1:]
+        return waypoints[0]
+    else:
+        return None
+
+def getError(act_error, waypoint, curr_pos):
+    if waypoint is None:
+        return 0
+    
+    # 计算车辆当前位置到目标导航点的方向
+    dx = waypoint[0] - curr_pos[0]
+    dy = waypoint[1] - curr_pos[1]
+    waypoint_angle = np.arctan2(dy, dx)
+
+    # 如果视觉检测到了车道线,结合车道线方向和导航点方向
+    if act_error is not None:
+        line_angle = act_error / 160.0 * np.pi / 2
+        return waypoint_angle * 0.7 + line_angle * 0.3
+    else:
+        # 如果没有检测到车道线,直接使用导航点的方向
+        return waypoint_angle
 
 
 # Main control loop
