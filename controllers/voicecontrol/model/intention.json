@@ -1,0 +1,566 @@
+[
+    {
+        "intent": "stop",
+        "speech": "Please stop the car."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Speed up the vehicle."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Slow down the car."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Turn the car left at the next intersection."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Take a right turn at the traffic light."
+    },
+    {
+        "intent": "redirect",
+        "speech": "I want to change the route from home to the airport."
+    },
+    {
+        "intent": "stop",
+        "speech": "Halt the car immediately."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Increase the speed of the vehicle."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decrease the speed slowly."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Make a left turn after the bridge."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right onto Main Street."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Change the destination to the train station."
+    },
+    {
+        "intent": "stop",
+        "speech": "Bring the car to a stop at the red light."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Step on the gas and accelerate."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Slow down gradually."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Take a left onto Maple Avenue."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right at the next junction."
+    },
+    {
+        "intent": "redirect",
+        "speech": "I need to reroute to avoid traffic."
+    },
+    {
+        "intent": "stop",
+        "speech": "Stop the vehicle at the crosswalk."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Accelerate quickly and merge onto the highway."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate before the sharp turn."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Make a left turn onto Elm Street."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right after the traffic light."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Change course to the nearest gas station."
+    },
+    {
+        "intent": "stop",
+        "speech": "Come to a complete stop at the stop sign."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Pick up speed and enter the freeway."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Slow down on the winding road."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Turn left at the crossroad."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right at the corner."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Reroute to the nearest hospital."
+    },
+    {
+        "intent": "stop",
+        "speech": "Halt the vehicle at the intersection."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Speed up and accelerate the car."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and decrease the velocity."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Take a left turn at the corner."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right onto Main Street."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Change the destination to the nearest hotel."
+    },
+    {
+        "intent": "stop",
+        "speech": "Bring the car to a halt at the pedestrian walkway."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Step on the gas pedal and accelerate rapidly."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Apply brakes and decelerate smoothly."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Make a left turn onto Pine Street."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right onto Oak Street."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Modify the destination to the shopping mall."
+    },
+    {
+        "intent": "stop",
+        "speech": "Come to a halt at the zebra crossing."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Hit the gas pedal and accelerate."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Ease off the accelerator and decelerate."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Turn left onto Pine Street."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right onto Oak Street."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Change the destination to the nearest gas station."
+    },
+    {
+        "intent": "stop",
+        "speech": "Bring the car to a stop at the traffic intersection."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Accelerate and increase the speed."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and decrease the velocity."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Make a left turn onto Oak Avenue."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right at the upcoming corner."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Modify the destination to the nearest hospital."
+    },
+    {
+        "intent": "stop",
+        "speech": "Stop the car at the red traffic light."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Floor the accelerator and accelerate."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Gradually decelerate and slow down."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Take a left turn at the corner."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right onto Main Street."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Change the destination to the nearest airport."
+    },
+    {
+        "intent": "stop",
+        "speech": "Halt the vehicle at the crosswalk."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Speed up and accelerate the car."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and decrease the speed."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Turn left at the next junction."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right onto Elm Street."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Change the route to the nearest gas station."
+    },
+    {
+        "intent": "stop",
+        "speech": "Stop the car at the traffic light."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Accelerate and move ahead."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and reduce the speed."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Take a left turn onto Oak Street."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right at the upcoming intersection."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Modify the destination to the nearest hospital."
+    },
+    {
+        "intent": "stop",
+        "speech": "Bring the car to a stop at the stop sign."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Accelerate and gain speed."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and slow down gradually."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Make a left turn onto Pine Street."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right onto Elm Street."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Change the destination to the nearest gas station."
+    },
+    {
+        "intent": "stop",
+        "speech": "Come to a stop at the traffic signal."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Step on the gas and accelerate quickly."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Slow down and decelerate smoothly."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Turn left at the intersection ahead."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right onto Maple Avenue."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Change the destination to the nearest hotel."
+    },
+    {
+        "intent": "stop",
+        "speech": "Stop the vehicle at the pedestrian crossing."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Accelerate and merge into the lane."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and park in the designated spot."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Make a left turn onto Park Avenue."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right onto Bridge Street."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Modify the destination to the shopping mall."
+    },
+    {
+        "intent": "stop",
+        "speech": "Stop the car at the traffic light."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Accelerate and pass the slower vehicles."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and approach the toll booth."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Make a left turn at the fork in the road."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right onto Maple Street."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Modify the destination to the nearest restaurant."
+    },
+    {
+        "intent": "stop",
+        "speech": "Come to a halt at the zebra crossing."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Accelerate and proceed through the green light."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and yield to the pedestrian."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Turn left at the roundabout exit."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right at the corner of the street."
+    },
+    {
+        "intent": "stop",
+        "speech": "Bring the car to a stop at the stop sign."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Accelerate and pass the slower vehicles."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and approach the toll booth."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Make a left turn at the fork in the road."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Modify the destination to the nearest restaurant."
+    },
+    {
+        "intent": "stop",
+        "speech": "Come to a halt at the zebra crossing."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Accelerate and proceed through the green light."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and yield to the pedestrian."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Turn left at the roundabout exit."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right at the corner of the street."
+    },
+    {
+        "intent": "redirect",
+        "speech": "I need to change my destination from the mall to the hospital."
+    },
+    {
+        "intent": "stop",
+        "speech": "Stop the car at the next traffic light."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Step on the gas pedal and speed up."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Ease off the accelerator and slow down gradually."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Make a left turn onto Elm Street."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right at the intersection ahead."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Change the route to the nearest gas station."
+    },
+    {
+        "intent": "stop",
+        "speech": "Halt the vehicle at the railway crossing."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Accelerate and merge into the freeway."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and prepare to exit the highway."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Turn left at the junction ahead."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right onto River Road."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Modify the destination to the airport terminal."
+    },
+    {
+        "intent": "stop",
+        "speech": "Stop the vehicle at the pedestrian crossing."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Accelerate and merge into the lane."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and park in the designated spot."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Make a left turn onto Park Avenue."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right onto Bridge Street."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Modify the destination to the nearest restaurant."
+    },
+    {
+        "intent": "stop",
+        "speech": "Come to a halt at the zebra crossing."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Accelerate and proceed through the green light."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and yield to the pedestrian."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Turn left at the roundabout exit."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right at the corner of the street."
+    },
+    {
+        "intent": "redirect",
+        "speech": "Change the destination to the city center."
+    },
+    {
+        "intent": "stop",
+        "speech": "Bring the car to a stop at the stop sign."
+    },
+    {
+        "intent": "accelerate",
+        "speech": "Accelerate and pass the slower vehicles."
+    },
+    {
+        "intent": "decelerate",
+        "speech": "Decelerate and approach the toll booth."
+    },
+    {
+        "intent": "turn left",
+        "speech": "Make a left turn at the fork in the road."
+    },
+    {
+        "intent": "turn right",
+        "speech": "Turn right onto Maple Street."
+    }
+]
