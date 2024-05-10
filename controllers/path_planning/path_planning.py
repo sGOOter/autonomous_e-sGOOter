@@ -88,7 +88,7 @@ def load_paths_from_file(input_file):
     return all_paths
 
 # Now you can load all paths with a single call
-all_paths = load_paths_from_file('/Users/apple/Desktop/robotic_project/sGOOter_project/controllers/demo/map_routes.txt')
+all_paths = load_paths_from_file('/Users/apple/Desktop/robotic_project/sGOOter_project/controllers/path_planning/map_routes.txt')
 
 class Node:
     def __init__(self, x, y):
